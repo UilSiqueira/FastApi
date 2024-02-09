@@ -1,0 +1,4 @@
+[flake8]
+exclude = .venv, __pycache__, migrations, ./app/db/__all__models.py
+ignore = F401, W291
+max-line-length = 120

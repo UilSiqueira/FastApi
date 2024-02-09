@@ -1,0 +1,25 @@
+#  Temporary files and generated files
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local configs
+instance/
+.env
+secret_key.py
+local_settings.py
+
+# Logs
+*.log
+
+# Development environment
+venv/
+ENV/
+.python-version
+
+# IDE
+.vscode/
