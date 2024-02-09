@@ -91,4 +91,4 @@ Notes
 
 Your FastAPI environment with Docker is now configured and ready to use. For more information about the project and its functionalities, refer to the documentation or the application's source code.
 
-![tests](Python-API/image/fastapi.png)
+![tests](/Python-API/image/fastapi.png)
