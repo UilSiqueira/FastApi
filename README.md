@@ -90,3 +90,4 @@ Notes
   Make sure the necessary permissions are granted for executing Docker commands.
 
 Your FastAPI environment with Docker is now configured and ready to use. For more information about the project and its functionalities, refer to the documentation or the application's source code.
+![tests](image/fastapi.png)
