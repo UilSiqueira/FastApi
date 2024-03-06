@@ -59,6 +59,24 @@ async def product_on_db(db_session):
     return product
 
 
+async def products_on_db(db_session):
+    category = CategoryModel(name="Clothes", slug="clothes")
+    db_session.add(category)
+    await db_session.commit()
+
+    products = [  
+        ProductModel(name="T-shirt", slug="t-shirt", price=100.99, stock=20, category_id=category.id),
+        ProductModel(name="Hat", slug="hat", price=79.99, stock=20, category_id=category.id),
+        ProductModel(name="Shorts", slug="shorts", price=89.99, stock=20, category_id=category.id),
+        ProductModel(name="Shoes", slug="shoes", price=109.99, stock=20, category_id=category.id),
+    ]
+
+    for product in products:
+        db_session.add(product)
+    await db_session.commit()
+    return products
+
+
 async def delete_products_on_db(db_session):
     products = await db_session.execute(select(ProductModel))
     for product in products.scalars().unique().all():

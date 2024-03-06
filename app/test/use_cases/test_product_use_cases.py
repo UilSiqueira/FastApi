@@ -1,7 +1,8 @@
 import pytest
 from fastapi.exceptions import HTTPException
+from fastapi_pagination import Page
 from app.db.models import Product as ProductModel
-from app.schemas.product import Product, ProductOutput
+from app.schemas.product import Product
 from app.use_cases.product import ProductUseCases
 
 from sqlalchemy.future import select
@@ -11,6 +12,7 @@ from app.test.deps import (
     categories_on_db,
     delete_products_on_db,
     product_on_db,
+    products_on_db
 )
 
 
@@ -110,42 +112,46 @@ async def test_delete_product_non_exist(db_session=db_session):
 
 async def test_list_products_uc(db_session=db_session):
     async for session in db_session():
-        product_from_db = await product_on_db(session)
+        product_from_db = await products_on_db(session)
 
         uc = ProductUseCases(session)
+        products_page = await uc.list_products(page=1, size=2)
 
-        products = await uc.list_products()
-
-        product_from_db_name = product_from_db.name
-        category_name = product_from_db.category["name"]
+        product_from_db_name = product_from_db[0].name
+        category_name = product_from_db[0].category.name
         await delete_products_on_db(session)
+    
+    assert len(products_page.items) == 2, \
+        f"Result: {len(products_page)}, Expected: {2}"
+    assert products_page.total == 1, \
+        f"Result: {products_page.total}, Expected: {1}"
+    assert products_page.page == 1, \
+        f"Result: {products_page.page}, Expected: {1}"
+    assert products_page.size == 2, \
+        f"Result: {products_page.size}, Expected: {2}"
 
-    assert len(products) == 1, \
-        f"Result: {len(products)}, Expected: {1}"
-    assert (type(products[0]) is ProductOutput), \
-        f"Result: {type(products[0])}, Expected: {ProductOutput}"
-    assert (products[0].name == product_from_db_name), \
-        f"Result: {products[0].name}, Expected: {product_from_db_name}"
-    assert (products[0].category.name == category_name), \
-        f"Result: {products[0].category.name}, Expected: {category_name}"
+    assert products_page.items[0].name == product_from_db_name, \
+        f"Result: {products_page.items[0].name}, Expected: {product_from_db_name}"
+    assert products_page.items[0].category.name == category_name, \
+        f"Result: {products_page.items[0].category.name}, Expected: {category_name}"
 
 
-async def test_list_products_with_search(db_session=db_session):
+async def test_list_products_uc_with_search(db_session=db_session):
     async for session in db_session():
         product_from_db = await product_on_db(session)
         uc = ProductUseCases(session)
 
-        products = await uc.list_products(search="t-shirt")
+        products_page = await uc.list_products(search="t-shirt")
 
         product_from_db_name = product_from_db.name
-        category_name = product_from_db.category["name"]
+        category_name = product_from_db.category.name
         await delete_products_on_db(session)
-
-    assert len(products) == 1, \
-        f"Result: {len(products)}, Expected: {1}"
-    assert (type(products[0]) is ProductOutput), \
-        f"Result: {type(products[0])}, Expected: {ProductOutput}"
-    assert (products[0].name == product_from_db_name), \
-        f"Result: {products[0].name}, Expected: {product_from_db_name}"
-    assert (products[0].category.name == category_name), \
-        f"Result: {products[0].category.name}, Expected: {category_name}"
+    
+    assert type(products_page) == Page, \
+        f"Result: {type(products_page)}, Expected: {Page}"
+    assert len(products_page.items) == 1, \
+        f"Result: {len(products_page.items)}, Expected: {1}"
+    assert products_page.items[0].name == product_from_db_name, \
+        f"Result: {products_page.items[0].name}, Expected: {product_from_db_name}"
+    assert products_page.items[0].category.name == category_name, \
+        f"Result: {products_page.items[0].category.name}, Expected: {category_name}"

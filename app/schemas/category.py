@@ -16,3 +16,6 @@ class Category(CustomBaseModel):
 
 class CategoryOutput(Category):
     id: int
+
+    class Config:
+        from_attributes=True

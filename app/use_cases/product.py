@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from sqlalchemy.future import select
 from fastapi import status
+from fastapi_pagination import Page, Params
 from app.db.models import Product as ProductModel
 from app.db.models import Category as CategoryModel
-from app.schemas.product import Product, ProductOutput
+from app.schemas.product import Product
 
 
 class ProductUseCases:
@@ -67,27 +68,20 @@ class ProductUseCases:
             await session.delete(product_on_db)
             await session.commit()
 
-    async def list_products(self, search: str = ""):
+    async def list_products(self, page: int = 1, size: int = 50, search: str = ""):
         async with self.db_session as session:
             query = select(ProductModel).filter(
                 or_(
                     ProductModel.name.ilike(f"%{search}%"),
                     ProductModel.slug.ilike(f"%{search}%"),
                 )
-            )
-
+            ).offset((page - 1) * size).limit(size)
             result = await session.execute(query)
             products_on_db = result.scalars().unique().all()
 
-            products = [
-                await self._serialize_product(product_on_db)
-                for product_on_db in products_on_db
-            ]
+            params = Params(page=page, size=size)
+            products_page = Page(items=products_on_db, total=1, **params.dict())
 
-            return products
+            return products_page
 
-    async def _serialize_product(self, product_on_db: ProductModel):
-        product_dict = product_on_db.__dict__
-        product_dict["category"] = product_on_db.category.__dict__
-
-        return ProductOutput(**product_dict)
+   

@@ -1,4 +1,3 @@
-# from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.db.models import Category as CategoryModel
@@ -14,6 +13,15 @@ class CategoryUseCases:
     async def add_category(self, category: Category):
         async with self.db_session as session:
             category_model = CategoryModel(**category.model_dump())
+            query = select(CategoryModel).filter(CategoryModel.slug == category_model.slug)
+            result = await session.execute(query)
+            category = result.scalars().unique().one_or_none()
+
+            if category:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Category already exists",
+                )
             session.add(category_model)
             await session.commit()
 

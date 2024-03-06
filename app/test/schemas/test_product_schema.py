@@ -1,5 +1,5 @@
 import pytest
-from app.schemas.product import Product, Category, ProductInput, ProductOutput
+from app.schemas.product import Product, CategoryOutput, ProductInput, ProductOutput
 
 
 async def test_product_schema():
@@ -40,7 +40,7 @@ async def test_product_input_schema():
 
 
 async def test_product_output_schema():
-    category = Category(name="Roupa", slug="roupa")
+    category = CategoryOutput(id=1, name="Roupa", slug="roupa")
 
     product_output = ProductOutput(
         id=1, name="Camisa", slug="camisa", price=10, stock=10, category=category
@@ -52,5 +52,5 @@ async def test_product_output_schema():
         "slug": "camisa",
         "price": 10,
         "stock": 10,
-        "category": {"name": "Roupa", "slug": "roupa"},
+        "category": {"id": 1, "name": "Roupa", "slug": "roupa"},
     }

@@ -9,7 +9,12 @@ from sqlalchemy.orm import sessionmaker
 TEST_MODE = config("TEST_MODE", default=False, cast=bool)
 DB_URL = config("DB_URL_TEST") if TEST_MODE else config("DB_URL")
 
-engine: AsyncEngine = create_async_engine(DB_URL, pool_pre_ping=True)
+engine: AsyncEngine = create_async_engine(
+    DB_URL, pool_size=20,
+    max_overflow=10,
+    pool_timeout=30, 
+    pool_pre_ping=True
+)
 
 Session: AsyncSession = sessionmaker(
     autocommit=False,

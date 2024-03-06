@@ -5,6 +5,7 @@ from app.test.deps import (
     db_session,
     categories_on_db,
     delete_products_on_db,
+    products_on_db,
     product_on_db,
 )
 
@@ -117,37 +118,52 @@ async def test_delete_product_route_invalid_id():
 
 async def test_list_products_route(db_session=db_session):
     async for session in db_session():
-        product = await product_on_db(session)
+        product = await products_on_db(session)
 
         async with httpx.AsyncClient(app=app, base_url=BASE_URL) as client:
-            response = await client.get("/product/list")
+            response = await client.get('/product/list?page=1&size=50')
 
         data = response.json()
-        product_slug = product.slug
+        product_slug = product[0].slug
 
         await delete_products_on_db(session)
 
-    assert (data[0]["slug"] == product_slug), \
-        f"Result: {data[0]['slug']}, Expected: {product_slug}"
+    assert 'items' in data, \
+        f"Result: items, Expected: {data}"
+    assert (data['items'][0]['slug'] == product_slug), \
+        f"Result: {data['items'][0]['slug']}, Expected: {product_slug}"
     assert (response.status_code == HTTP_200_OK), \
         f"Result: {response.status_code}, Expected: {HTTP_200_OK}"
+    assert data['total'] == 1, \
+        f"Result: {data['total']}, Expected: {1}"
+    assert data['page'] == 1, \
+        f"Result: {data['page']}, Expected: {1}"
+    assert data['size'] == 2, \
+        f"Result: {data['size']}, Expected: {2}"
 
 
 async def test_list_products_route_with_search(db_session=db_session):
 
     async for session in db_session():
-        products_on_db = await product_on_db(session)
+        product = await products_on_db(session)
 
         async with httpx.AsyncClient(app=app, base_url=BASE_URL) as client:
             response = await client.get("/product/list?search=t-shirt")
 
         data = response.json()
-        product_slug = products_on_db.slug
+        product_slug = product[0].slug
 
         await delete_products_on_db(session)
 
+    assert 'items' in data, \
+        f"Result: items, Expected: {data}"
+    assert (data['items'][0]['slug'] == product_slug), \
+        f"Result: {data['items'][0]['slug']}, Expected: {product_slug}"
     assert (response.status_code == HTTP_200_OK), \
-        f"Result: {response.status_code},  Expected: {HTTP_200_OK}"
-    assert len(data) == 1
-    assert (data[0]["slug"] == product_slug), \
-        f"Result: {data[0]['slug']}, Expected: {product_slug}"
+        f"Result: {response.status_code}, Expected: {HTTP_200_OK}"
+    assert data['total'] == 1, \
+        f"Result: {data['total']}, Expected: {1}"
+    assert data['page'] == 1, \
+        f"Result: {data['page']}, Expected: {1}"
+    assert data['size'] == 50, \
+        f"Result: {data['size']}, Expected: {50}"
