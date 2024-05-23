@@ -1,9 +1,9 @@
 ![tests](img/fastapi.png)
 
 
-#Multilingual Content (Portuguese, English).
+#Multilingual Content   (Portuguese, English) #
 
-A seguir um breve resumo das bibliotecas que foram utilizados dentro desses projetos, e também sobre o Docker:
+A seguir um breve resumo das bibliotecas que foram utilizados dentro desses projetos, e também sobre o Docker: #
 
 Poetry é um gerenciador de pacotes para Python que facilita a instalação, gerenciamento e atualização de pacotes Python. Ele é baseado no gerenciador de pacotes PyPI e oferece uma interface de linha de comando simples e intuitiva.
 
